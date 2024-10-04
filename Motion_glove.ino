@@ -1,6 +1,4 @@
 #include <WiFi.h>
-#include <Wire.h>
-#include <MPU6050.h>
 
 // Network credentials
 const char* ssid = "ESP32";
@@ -8,40 +6,20 @@ const char* password = "password";
 
 WiFiServer server(80);
 
-MPU6050 mpu;
-
 // Flex Sensor Pins (GPIOs)
 const int flexSensorPins[5] = {32, 33, 34, 35, 36};
 
-// Variables to store sensor readings
-int16_t ax, ay, az;
-int16_t gx, gy, gz;
-float angleX, angleY;
+// Variables to store flex sensor readings
 int flexValues[5];
 
 // Default value for flex sensors (not bent)
 const int flexDefaultValue = 850;
 
-String angleMessage = "";
 String flexMessages[5] = {"", "", "", "", ""};
 String combinedMessage = "";
 
 void setup() {
   Serial.begin(115200);
-
-  // Initialize I2C communication
-  Wire.begin(21, 22);  // SDA, SCL pins
-  
-  // Initialize MPU6050
-  mpu.initialize();
-  
-  // Check if the MPU6050 is connected
-  if (!mpu.testConnection()) {
-    Serial.println("MPU6050 connection failed");
-    while (1);
-  }
-
-  Serial.println("MPU6050 connection successful");
 
   // Set up Flex Sensor pins as inputs
   for (int i = 0; i < 5; i++) {
@@ -59,51 +37,33 @@ void setup() {
 }
 
 void loop() {
-  // Get accelerometer and gyroscope data from MPU6050
-  mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-  
-  // Convert accelerometer data to angles
-  angleX = atan2(ay, az) * 180 / PI;
-  angleY = atan2(ax, az) * 180 / PI;
-
   // Read the values from the flex sensors
   for (int i = 0; i < 5; i++) {
     flexValues[i] = analogRead(flexSensorPins[i]);
   }
 
-  // Display MPU6050 angles on Serial Monitor
-  Serial.print("Angle X: ");
-  Serial.print(angleX);
-  Serial.print("\tAngle Y: ");
-  Serial.println(angleY);
-
   // Determine the messages based on flex sensor values
   for (int i = 0; i < 5; i++) {
     if (flexValues[i] < flexDefaultValue - 100) {
-      flexMessages[i] = "Flex Sensor " + String(i+1) + " is bent!";
+      switch (i) {
+        case 0: flexMessages[i] = "I am okay"; break;
+        case 1: flexMessages[i] = "I want water"; break;
+        case 2: flexMessages[i] = "I want to eat"; break;
+        case 3: flexMessages[i] = "I want to pee"; break;
+        case 4: flexMessages[i] = "I want to go to the bathroom"; break;
+      }
     } else {
-      flexMessages[i] = "Flex Sensor " + String(i+1) + " is not bent.";
+      flexMessages[i] = "";  // No message if not bent
     }
     Serial.println(flexMessages[i]);
   }
 
-  // Determine angle-based messages
-  if (angleX > 40 && angleX < 50) {
-    angleMessage = "MPU6050: Angle X is between 40 and 50 degrees!";
-  } else if (angleX > 30 && angleX < 40) {
-    angleMessage = "MPU6050: Angle X is between 30 and 40 degrees!";
-  } else {
-    angleMessage = "MPU6050: Angle X is out of range.";
+  // Print the message to Serial Monitor if any flex sensor is bent
+  for (int i = 0; i < 5; i++) {
+    if (flexMessages[i] != "") {
+      Serial.println(flexMessages[i]);
+    }
   }
-  Serial.println(angleMessage);
-
-  // Determine combined message based on MPU6050 and flex sensor conditions
-  if (angleX > 45 && angleX < 50 && flexValues[0] < flexDefaultValue - 100) {
-    combinedMessage = "Special condition met: Angle X is between 45 and 50 degrees and Flex Sensor 1 is bent!";
-  } else {
-    combinedMessage = "No special conditions met.";
-  }
-  Serial.println(combinedMessage);
 
   // Web Server Handling
   WiFiClient client = server.available();
@@ -135,20 +95,21 @@ void loop() {
       client.println("</script>");
       client.println("</head>");
       client.println("<body>");
-      client.println("<h1>ESP32 MPU6050 & Flex Sensor Real-Time Data</h1>");
+      client.println("<h1>ESP32 Flex Sensor Real-Time Data</h1>");
       client.println("<div id=\"data\">Loading...</div>");
       client.println("</body></html>");
 
       client.println();
     }
 
-    // Serve the data in plain text, including MPU6050 and flex sensor messages
+    // Serve the data in plain text, including flex sensor messages
     if (request.indexOf("GET /data") >= 0) {
-      String response = angleMessage + "<br>";
+      String response = "";
       for (int i = 0; i < 5; i++) {
-        response += flexMessages[i] + "<br>";
+        if (flexMessages[i] != "") {
+          response += flexMessages[i] + "<br>";
+        }
       }
-      response += combinedMessage;
       client.println(response);
     }
 
