@@ -1,58 +1,70 @@
 <?php
 require_once "./classes/userController.php";
 require_once "./Tools/functions.php";
+session_start();
 
-// Process form submission
+$signupError = false; // Initialize flag for signup error
+$errors = []; // Initialize an empty errors array
+
+// Function to handle signup validation
+function validate_signup($user, $confirmPassword) {
+    $errors = [];
+
+    // Validate username
+    if (!validate_field($user->username)) {
+        $errors['username'] = "Please input a valid username";
+    } elseif (username_exists($user->username)) {
+        $errors['username'] = "Username already exists";
+    }
+
+    // Validate password
+    $passwordValidationResult = validate_password($user->password);
+    if (!validate_field($user->password) || $passwordValidationResult !== true) {
+        $errors['password'] = is_string($passwordValidationResult) ? $passwordValidationResult : "Please input a valid password";
+    }
+
+    // Validate confirm password
+    if (!isset($errors['password']) && !validate_conPass($user->password, $confirmPassword)) {
+        $errors['confirmPassword'] = "Passwords do not match";
+    }
+
+    return $errors; // Return the errors array
+}
+
+// Process signup form submission
 if (isset($_POST['signup'])) {
     $user = new User();
-
     $user->username = htmlentities($_POST['username']);
     $user->password = htmlentities($_POST['password']);
     $confirmPassword = htmlentities($_POST['confirmPassword']);
 
-    $errors = [];
+    // Validate the form input
+    $errors = validate_signup($user, $confirmPassword);
 
-    // Validation logic
-    if (!validate_field($user->username)) {
-        $errors['username'] = "Please input a valid username";
-    }
-
-    if (!validate_field($user->password) || !validate_password($user->password)) {
-        $errors['password'] = "Please input a valid password";
-    }
-
-    if (!validate_conPass($user->password, $confirmPassword)) {
-        $errors['confirmPassword'] = "Passwords do not match";
-    }
-
-    // If there are no validation errors, attempt to create the user
+    // If no validation errors, proceed to create the account
     if (empty($errors)) {
         if ($user->addUser()) {
-            // Redirect or show success message
             echo "Account Created";
-
             if (isset($_POST['return'])) {
                 header("Location: index.php");
-                exit; // Make sure to call exit after a header redirect
+                exit; // Stop further execution after redirect
             }
         } else {
             $errors['general'] = 'Unable to create an account';
         }
+    } else {
+        $signupError = true; // Set signup error flag to true if validation fails
+        $_SESSION['errors'] = $errors; // Store errors in session for display
     }
-
-
 }
-
-session_start();
 
 // Process sign-in form submission
 if (isset($_POST['signin'])) {
     $username = htmlentities($_POST['username']);
     $password = htmlentities($_POST['password']);
+    $errors = []; // Initialize sign-in errors
 
-    $errors = [];
-
-    // Validate input fields
+    // Validate username and password input
     if (!validate_field($username)) {
         $errors['username'] = "Please enter a valid username.";
     }
@@ -61,24 +73,29 @@ if (isset($_POST['signin'])) {
         $errors['password'] = "Please enter a valid password.";
     }
 
-    // If no errors, proceed with user authentication
+    // If no errors, attempt to authenticate the user
     if (empty($errors)) {
         $user = new User();
         $userData = $user->getUserByUsername($username);
 
         if ($userData && password_verify($password, $userData['password'])) {
-            // Correct credentials: start session and redirect to dashboard
+            // Set session variables and redirect to dashboard
             $_SESSION['username'] = $username;
             $_SESSION['user_id'] = $userData['id'];
-
-            header("Location: dashboard.php"); // Redirect to dashboard or home page
-            exit;
+            header("Location: dashboard.php");
+            exit; // Stop further execution after redirect
         } else {
             $errors['general'] = "Invalid username or password.";
         }
     }
-};
+}
+
+// Clear session-stored errors if the page is refreshed without form submission
+if (!isset($_POST['signup']) && isset($_SESSION['errors'])) {
+    unset($_SESSION['errors']);
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -95,34 +112,36 @@ if (isset($_POST['signin'])) {
     <link rel="stylesheet" href="./assets/css/style.css">
 </head>
 <body>
-<div class="container" id="container">
-    <div class="form-container sign-up-container">
-        <form action="index.php" method="POST">
-            <h1>Create Account</h1>
-            <div class="infield">
-                <input type="text" placeholder="Name" name="username" required />
+<div class="container <?php if (isset($_SESSION['errors'])) echo 'right-panel-active'; ?>" id="container">
+
+<div class="form-container sign-up-container">
+            <form action="index.php" method="POST">
+                <h1>Create Account</h1>
+                <div class="infield">
+                <input type="text" placeholder="Name" name="username" value="<?php echo htmlentities($_POST['username'] ?? ''); ?>" required />
                 <label></label>
-                <?php if (!empty($errors['username'])): ?>
-                    <span class=''><?php echo $errors['username']; ?></span>
-                <?php endif; ?>
-            </div>
-            <div class="infield">
-                <input type="password" placeholder="Password" name="password" required />
-                <label></label>
-            </div>
-            <?php if (!empty($errors['password'])): ?>
-                    <span class='text-danger text-sm font-geist'><?php echo $errors['password']; ?></span>
-            <?php endif; ?>
-            <div class="infield">
-                <input type="password" placeholder="Confirm Password" name="confirmPassword" required />
-                <label></label>
-            </div>
-            <?php if (!empty($errors['confirmPassword'])): ?>
-                    <span class=''><?php echo $errors['confirmPassword']; ?></span>
-                <?php endif; ?>
-            <button type="submit" name="signup">Sign Up</button>
-        </form>
-    </div>
+                    <?php if (!empty($errors['username'])): ?>
+                        <span class='text-danger'><?php echo $errors['username']; ?></span>
+                    <?php endif; ?>
+                </div>
+                <div class="infield">
+                    <input type="password" placeholder="Password" name="password" required />
+                    <label></label>
+                </div>
+                <?php if (!empty($errors['password'])): ?>
+                <span class='text-danger'><?php echo $errors['password']; ?></span>
+                  <?php endif; ?>
+                <div class="infield">
+                    <input type="password" placeholder="Confirm Password" name="confirmPassword" required />
+                    <label></label>
+                </div>
+                <?php if (!empty($errors['confirmPassword'])): ?>
+                <span class='text-danger'><?php echo $errors['confirmPassword']; ?></span>
+                 <?php endif; ?>
+                <button type="submit" name="signup">Sign Up</button>
+                <?php unset($_SESSION['errors']); ?>
+            </form>
+        </div>
     <div class="form-container sign-in-container">
         <form action="dashboard.php" method="POST">
             <h1>Sign in</h1>
@@ -172,6 +191,10 @@ if (isset($_POST['signin'])) {
                 overlayBtn.classList.add('btnScaled');
             })
         });
+        const signupError = <?php echo json_encode($signupError); ?>;
+        if (signupError) {
+            container.classList.add('right-panel-active');  // Keep the sign-up form visible if there were errors
+        }
     </script>
 
 </body>

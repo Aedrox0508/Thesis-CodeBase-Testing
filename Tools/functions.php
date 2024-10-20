@@ -27,7 +27,7 @@
             return false;
         }
     
-        $sql = "SELECT user_id FROM user_accounts WHERE username = ?";
+        $sql = "SELECT user_id FROM users WHERE username = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param('s', $username);
         $stmt->execute();
