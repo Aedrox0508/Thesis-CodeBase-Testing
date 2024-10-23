@@ -80,6 +80,13 @@
             $query->execute();
             return $query->fetchAll(PDO::FETCH_ASSOC); // Fetch all matching records
         }
+        public function get_special_gestures() {
+            // Query to retrieve the first 6 gestures related to the thumb
+            $sql = "SELECT * FROM gesture ORDER BY gesture_id LIMIT 4 OFFSET 15"; // Adjust as needed
+            $query = $this->db->connect()->prepare($sql);
+            $query->execute();
+            return $query->fetchAll(PDO::FETCH_ASSOC); // Fetch all matching records
+        }
 
     }
 ?>
