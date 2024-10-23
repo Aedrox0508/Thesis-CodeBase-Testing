@@ -1,120 +1,135 @@
 #include <WiFi.h>
+#include <HTTPClient.h>
 
-// Network credentials
-const char* ssid = "ESP32";
-const char* password = "password";
+const char* ssid = "";  // Replace with your WiFi SSID
+const char* password = "";  // Replace with your WiFi password
 
-WiFiServer server(80);
+// Server URL
+String serverName = "https://movewave.online/MoveWave_V2/fetch_gesture.php";  // URL for the PHP file
 
-// Flex Sensor Pins (GPIOs)
-const int flexSensorPins[5] = {32, 33, 34, 35, 36};
-
-// Variables to store flex sensor readings
-int flexValues[5];
-
-// Default value for flex sensors (not bent)
-const int flexDefaultValue = 850;
-
-String flexMessages[5] = {"", "", "", "", ""};
-String combinedMessage = "";
+// Flex sensor pins
+const int flexPinThumb = 36;
+const int flexPinIndex = 35;
+const int flexPinMiddle = 34;
+const int flexPinRing = 33;
+const int flexPinPinky = 32;
 
 void setup() {
   Serial.begin(115200);
+  WiFi.begin(ssid, password);
 
-  // Set up Flex Sensor pins as inputs
-  for (int i = 0; i < 5; i++) {
-    pinMode(flexSensorPins[i], INPUT);
+  // Wait until the ESP32 is connected to WiFi
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
   }
-
-  // Connect to Wi-Fi network
-  WiFi.softAP(ssid, password);
-  
-  // Print IP address and start web server
-  Serial.println("");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.softAPIP());
-  server.begin();
+  Serial.println("Connected to WiFi");
 }
 
 void loop() {
-  // Read the values from the flex sensors
-  for (int i = 0; i < 5; i++) {
-    flexValues[i] = analogRead(flexSensorPins[i]);
-  }
+  int thumb_value = analogRead(flexPinThumb);
+  int index_value = analogRead(flexPinIndex);
+  int middle_value = analogRead(flexPinMiddle);
+  int ring_value = analogRead(flexPinRing);
+  int pinky_value = analogRead(flexPinPinky);
 
-  // Determine the messages based on flex sensor values
-  for (int i = 0; i < 5; i++) {
-    if (flexValues[i] < flexDefaultValue - 100) {
-      switch (i) {
-        case 0: flexMessages[i] = "I am okay"; break;
-        case 1: flexMessages[i] = "I want water"; break;
-        case 2: flexMessages[i] = "I want to eat"; break;
-        case 3: flexMessages[i] = "I want to pee"; break;
-        case 4: flexMessages[i] = "I want to go to the bathroom"; break;
-      }
+  // Display the sensor readings
+
+  String gesture_name = "";
+
+  // Determine the gesture name based on which fingers are bent
+  // Thumb connected gestures
+  if (thumb_value > 250 && thumb_value < 650) {
+    // Check for the most complex gestures first (e.g., Thumb, Index, Middle, Ring, Pinky)
+    if (thumb_value > 250 && thumb_value < 650 && index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 20";  // All fingers
+    } else if (thumb_value > 250 && thumb_value < 650 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
+      gesture_name = "Com 18";  // Thumb, Middle & Ring
+    } else if (index_value > 250 && index_value < 650) {
+      gesture_name = "Com 2";  // Thumb & Index
+    } else if (middle_value > 250 && middle_value < 650) {
+      gesture_name = "Com 3";  // Thumb & Middle
+    } else if (ring_value > 250 && ring_value < 650) {
+      gesture_name = "Com 4";  // Thumb & Ring
+    } else if (pinky_value > 250 && pinky_value < 650) {
+      gesture_name = "Com 5";  // Thumb & Pinky
     } else {
-      flexMessages[i] = "";  // No message if not bent
-    }
-    Serial.println(flexMessages[i]);
-  }
-
-  // Print the message to Serial Monitor if any flex sensor is bent
-  for (int i = 0; i < 5; i++) {
-    if (flexMessages[i] != "") {
-      Serial.println(flexMessages[i]);
+      gesture_name = "Com 1";  // Thumb only
     }
   }
 
-  // Web Server Handling
-  WiFiClient client = server.available();
-
-  if (client) {
-    String request = client.readStringUntil('\r');
-    client.flush();
-
-    if (request.indexOf("GET / ") >= 0) {
-      client.println("HTTP/1.1 200 OK");
-      client.println("Content-type:text/html");
-      client.println("Connection: close");
-      client.println();
-
-      client.println("<!DOCTYPE html><html>");
-      client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-      client.println("<script>");
-      client.println("function getData() {");
-      client.println("  var xhttp = new XMLHttpRequest();");
-      client.println("  xhttp.onreadystatechange = function() {");
-      client.println("    if (this.readyState == 4 && this.status == 200) {");
-      client.println("      document.getElementById(\"data\").innerHTML = this.responseText;");
-      client.println("    }");
-      client.println("  };");
-      client.println("  xhttp.open(\"GET\", \"/data\", true);");
-      client.println("  xhttp.send();");
-      client.println("}");
-      client.println("setInterval(function() { getData(); }, 1000);");  // Update every 1 second
-      client.println("</script>");
-      client.println("</head>");
-      client.println("<body>");
-      client.println("<h1>ESP32 Flex Sensor Real-Time Data</h1>");
-      client.println("<div id=\"data\">Loading...</div>");
-      client.println("</body></html>");
-
-      client.println();
+  // Index connected gestures
+  else if (index_value > 250 && index_value < 600) {
+    if (index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 16";  // Index, Middle, Ring & Pinky
+    } else if (index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
+      gesture_name = "Com 17";  // Index, Middle & Ring
+    } else if (middle_value > 250 && middle_value < 600) {
+      gesture_name = "Com 7";  // Index & Middle
+    } else if (ring_value > 250 && ring_value < 600) {
+      gesture_name = "Com 8";  // Index & Ring
+    } else if (pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 9";  // Index & Pinky
+    } else {
+      gesture_name = "Com 6";  // Index only
     }
+  }
 
-    // Serve the data in plain text, including flex sensor messages
-    if (request.indexOf("GET /data") >= 0) {
-      String response = "";
-      for (int i = 0; i < 5; i++) {
-        if (flexMessages[i] != "") {
-          response += flexMessages[i] + "<br>";
-        }
+  // Middle connected gestures
+  else if (middle_value > 250 && middle_value < 600) {
+    if (middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 19";  // Middle, Ring & Pinky
+    } else if (ring_value > 250 && ring_value < 600) {
+      gesture_name = "Com 11";  // Middle & Ring
+    } else if (pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 12";  // Middle & Pinky
+    } else {
+      gesture_name = "Com 10";  // Middle only
+    }
+  }
+
+  // Ring connected gestures
+  else if (ring_value > 250 && ring_value < 600) {
+    if (pinky_value > 250 && pinky_value < 600) {
+      gesture_name = "Com 14";  // Ring & Pinky
+    } else {
+      gesture_name = "Com 13";  // Ring only
+    }
+  }
+
+  // Pinky connected gestures
+  else if (pinky_value > 250 && pinky_value < 600) {
+    gesture_name = "Com 15";  // Pinky only
+  }
+
+
+  // If a gesture name is determined, send it to the server
+  if (gesture_name != "") {
+    String postData = "gesture_name=" + gesture_name;
+    if (WiFi.status() == WL_CONNECTED) {
+      HTTPClient http;
+      http.begin(serverName);
+      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+      // Send the gesture name to the PHP server
+      int httpResponseCode = http.POST(postData);
+
+      // Display HTTP response code for debugging
+      Serial.print("HTTP Response code: ");
+      Serial.println(httpResponseCode);
+
+      if (httpResponseCode > 0) {
+        String response = http.getString();
+        Serial.println("Response from server: " + response);  // Should print the flex_gesture from the database
+      } else {
+        Serial.println("Error on sending POST");
       }
-      client.println(response);
-    }
 
-    client.stop();
+      http.end();  // Free resources
+    } else {
+      Serial.println("WiFi not connected");
+    }
   }
 
-  delay(500);  // Delay for readability in Serial Monitor
+  delay(3000);  // Wait for 3 seconds before the next reading
 }
