@@ -7,6 +7,7 @@ $index_gestures = $gestureController->get_index_gestures(); // Retrieve thumb ge
 $middle_gestures = $gestureController->get_middle_gestures(); // Retrieve thumb gestures
 $ring_gestures = $gestureController->get_ring_gestures(); // Retrieve thumb gestures
 $pinky_gestures = $gestureController->get_pinky_gestures(); // Retrieve thumb gestures
+$special_gestures = $gestureController->get_special_gestures(); // Retrieve thumb gestures
 
 $gesture = new Gesture();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
@@ -52,32 +53,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                         </h1>
 
                     </div>
-                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-start" id="menu">
+                    <ul class="nav nav-pills flex-column mb-sm-auto mb-0 align-items-start mt-2" id="menu">
                         <li class="nav-item">
                             <a href="dashboard.php" class="nav-link align-middle px-0 nav-c">
-                                <i class="fa-solid fa-qrcode"></i> <span class="ms-1 d-none d-sm-inline">Dashboard</span>
+                                <i class="fa-solid fa-qrcode"></i> <span class="ms-1 d-none d-sm-inline nav-text">Dashboard</span>
                             </a>
                         </li>
+
                         <li class="nav-item">
                             <a href="#" class="nav-link align-middle px-0 nav-c">
-                                <i class="fa-solid fa-user-gear"></i></i> <span class="ms-1 d-none d-sm-inline">Moderator</span>
+                                <i class="fa-solid fa-sliders"></i> <span class="ms-1 d-none d-sm-inline nav-text">Presets</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link align-middle px-0 nav-c">
-                                <i class="fa-solid fa-user"></i> <span class="ms-1 d-none d-sm-inline">Patient</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link align-middle px-0 nav-c">
-                                <i class="fa-solid fa-sliders"></i> <span class="ms-1 d-none d-sm-inline">Presets</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="#" class="nav-link align-middle px-0 nav-c">
-                                <i class="fa-solid fa-gears"></i> <span class="ms-1 d-none d-sm-inline">Usage</span>
-                            </a>
-                        </li>
+                    
                     </ul>
                     <hr>
                     <div class="pb-4">
@@ -96,11 +84,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                     <h3 class=" presets "> Presets </h3>
                     <div class="col row">
                         <!-- THUMB -->
-                        <div class="col-6 col-md-2 align-content-start finger">
+                        <div class="col-6 col-md-4 align-content-start finger">
                             <div class="card finger-card mr-5">
                                 <div class="card-body">
                                     <div class="form-group d-flex align-items-center">
-                                        <h5 class="finger">Thumb</h5>
+                                        <h3 class="finger">Thumb</h3>
                                         <label class="switch">
                                             <input type="checkbox" id="thumbToggle">
                                             <span class="slider"></span>
@@ -120,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         }
                                     ?>
                                         <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
-                                            <h6 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h6>
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
                                             <label class="switch">
                                                 <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
                                                 <span class="slider"></span>
@@ -141,11 +129,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                         </div>
 
                         <!-- Pointer -->
-                        <div class="col-6 col-md-2 align-content-start finger">
+                        <div class="col-6 col-md-4 align-content-start finger">
                             <div class="card finger-card mr-5">
                                 <div class="card-body">
                                     <div class="form-group d-flex align-items-center">
-                                        <h5 class="finger">Pointer</h5>
+                                        <h3 class="finger">Pointer</h3>
                                         <label class="switch">
                                             <input type="checkbox" id="thumbToggle">
                                             <span class="slider"></span>
@@ -164,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         }
                                     ?>
                                         <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
-                                            <h6 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h6>
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
                                             <label class="switch">
                                                 <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
                                                 <span class="slider"></span>
@@ -186,11 +174,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                         </div>
 
                         <!-- Middle -->
-                        <div class="col-6 col-md-2 align-content-start finger">
+                        <div class="col-6 col-md-4 align-content-start finger">
                             <div class="card finger-card mr-5">
                                 <div class="card-body">
                                     <div class="form-group d-flex align-items-center">
-                                        <h5 class="finger">Middle</h5>
+                                        <h3 class="finger">Middle</h3>
                                         <label class="switch">
                                             <input type="checkbox" id="thumbToggle">
                                             <span class="slider"></span>
@@ -210,7 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         }
                                     ?>
                                         <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
-                                            <h6 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h6>
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
                                             <label class="switch">
                                                 <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
                                                 <span class="slider"></span>
@@ -231,11 +219,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                             </div>
                         </div>
                         <!-- Ring -->
-                        <div class="col-6 col-md-2 align-content-start finger">
+                        <div class="col-6 col-md-4 align-content-start finger">
                             <div class="card finger-card mr-5">
                                 <div class="card-body">
                                     <div class="form-group d-flex align-items-center">
-                                        <h5 class="finger">Ring</h5>
+                                        <h3 class="finger">Ring</h3>
                                         <label class="switch">
                                             <input type="checkbox" id="thumbToggle">
                                             <span class="slider"></span>
@@ -255,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         }
                                     ?>
                                         <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
-                                            <h6 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h6>
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
                                             <label class="switch">
                                                 <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
                                                 <span class="slider"></span>
@@ -276,11 +264,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                             </div>
                         </div>
                         <!-- Pinky -->
-                        <div class="col-6 col-md-2 align-content-start finger">
+                        <div class="col-6 col-md-4 align-content-start finger">
                             <div class="card finger-card mr-5">
                                 <div class="card-body">
                                     <div class="form-group d-flex align-items-center">
-                                        <h5 class="finger">Pinky</h5>
+                                        <h3 class="finger">Pinky</h3>
                                         <label class="switch">
                                             <input type="checkbox" id="thumbToggle">
                                             <span class="slider"></span>
@@ -300,7 +288,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         }
                                     ?>
                                         <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
-                                            <h6 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h6>
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
+                                            <label class="switch">
+                                                <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
+                                                <span class="slider"></span>
+                                            </label>
+                                            <i class="fa fa-ellipsis-h ellipsis-icon modal-pic px-2"
+                                                aria-hidden="true"
+                                                style="cursor: pointer;"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#imageModal"
+                                                data-img="<?= './assets/img/' . $imageIndex . '.png' ?>"
+                                                data-id="<?= $gesture['gesture_id'] ?>"
+                                                data-value="<?= htmlspecialchars($gesture['gesture_value']) ?>">
+                                            </i>
+                                        </div>
+                                    <?php endforeach; ?>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special  -->
+                        <div class="col-6 col-md-4 align-content-start finger">
+                            <div class="card finger-card mr-5">
+                                <div class="card-body">
+                                    <div class="form-group d-flex align-items-center">
+                                        <h3 class="finger">Special</h3>
+                                        <label class="switch">
+                                            <input type="checkbox" id="thumbToggle">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                    <?php
+                                    // Start image index for Thumb gestures at 6
+                                    $defaultImageIndex = 17; // Start index for other gestures
+                                    foreach ($special_gestures as $gesture):
+                                        $imageIndex = $defaultImageIndex; // Default image index for non-thumb gestures
+
+                                        if (strpos($gesture['gesture_name'], 'Thumb') === 0) {
+                                            $imageIndex = $specailImageIndex; // Use thumb image index for thumb gestures
+                                            $pinkyImageIndex++; // Increment thumb image index
+                                        } else {
+                                            $defaultImageIndex++; // Increment default image index for non-thumb gestures
+                                        }
+                                    ?>
+                                        <div class="form-group d-flex align-items-center <?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture' : '' ?>">
+                                            <h5 class="finger"><?= htmlspecialchars($gesture['gesture_name']) ?></h5>
                                             <label class="switch">
                                                 <input type="checkbox" class="<?= strpos($gesture['gesture_name'], 'Thumb') === 0 ? 'thumb-gesture-checkbox' : '' ?>">
                                                 <span class="slider"></span>
@@ -324,6 +359,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                     </div>
                 </div>
             </div>
+                <div class="hamburger" id="hamburger">
+                &#9776; <!-- Hamburger icon -->
+                 </div>
         </div>
 
         <!-- Modal HTML structure -->
@@ -331,7 +369,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="imageModalLabel">Image Preview</h5>
+                        <h3 class="modal-title" id="imageModalLabel">Image Preview</h3>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body d-flex flex-column">

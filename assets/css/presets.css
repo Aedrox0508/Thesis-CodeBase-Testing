@@ -45,6 +45,7 @@ body {
 .move-nav {
     color: rgb(162, 61, 162);
     padding-left: 2px;
+    font-size: 2rem;
 }
 
 .wave-nav {
@@ -72,9 +73,7 @@ body {
 
 }
 
-.nav-side {
-    border: 0.5px solid rgba(0, 0, 0, 0.411);
-}
+
 
 .nav-item {
 
@@ -168,13 +167,15 @@ input:checked+.slider:before {
 }
 
 .presets {
+    font-family: monospace;
     font-weight: 900;
+    padding-top: 20px;
 }
 
 .finger {
-    font-weight: 600;
     padding: 10px;
-    margin: 10px;
+    font-weight: 1.5rem;
+    font-family: monospace;
 }
 
 .modalImage {
@@ -183,65 +184,70 @@ input:checked+.slider:before {
 }
 
 .nav-side {
-    background: rgba(66, 11, 129, 0.53);
+    background-color: rgba(40, 9, 76, 0.53);
     background: linear-gradient(90deg, rgba(66, 11, 129, 0.632) 0%, rgba(156, 33, 154, 0.533) 78%);
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
-    /* Ensures it stays on top */
-    background-color: #f8f9fa;
-    /* Optional background */
     overflow-y: auto;
+    
+    
 }
 
 .nav-c {
     color: #ffffff;
-
-
 }
 
 .nav-title {
     display: flex;
-    justify-content: space-between;
-    /* Spread text and icon across the width */
     align-items: center;
 }
 
-.move-nav {
-    font-size: 2.5rem;
-    /* Adjust as needed */
-    margin-left: auto;
-    /* Push text to the left */
-}
+
 
 
 
 .nav-icon {
-    width: 65px;
-    /* Size of the icon */
-    height: 65px;
+    width: 55px;
+    height: 55px;
 }
 
 .finger-card {
-    width: 210px;
-    height: 500px;
+    width: 310px;
+    height: 350px;
     border: 1px solid #ddd;
-    /* Border around the card */
     border-radius: 8px;
-    /* Rounded corners */
-    padding: 5px;
-    /* Padding inside the card */
-    margin: 40px;
-    /* Space between cards */
+    padding: 15px;
+    margin: 10px;
     background-color: #fff;
-    /* White background */
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    /* Subtle shadow for a 3D effect */
+    padding-left: 60px;
 }
 
 .section {
-    padding-left: 280px;
+    padding-left: 340px;
+}
+.nav-text , .nav-c{
+    padding: 10px;
+    font-family: monospace;
+    text-shadow:  
+            -1px  1px 0 rgb(73, 42, 77),
+             1px  1px 0 rgb(181, 177, 177);
+}
+
+.nav-link:hover {
+    color: black; 
+    background-color: transparent; 
+}
+.hamburger {
+    display: none;
+    cursor: pointer;
+    font-size: 30px;
+    padding: 15px;
+    background: #333;
+    color: white;
+    z-index: 1000;
 }
 
 /* Media query for smaller screens */
@@ -262,11 +268,25 @@ input:checked+.slider:before {
         margin-left: 0;
         /* No margin on small screens */
     }
+    .nav-side {
+        position: absolute;
+        left: -250px; /* Hide sidebar off-screen */
+        height: 100%;
+        transition: transform 0.3s ease;
+    }
+
+    .nav-side.active {
+        transform: translateX(250px); /* Slide in */
+    }
+
+    .hamburger {
+        display: block; /* Show hamburger icon */
+    }
 }
 
 @media (max-width: 320px) {
     .section {
-        padding-left: 20PX;
+        padding-left: 120PX;
     }
 
     .fingers {
@@ -284,9 +304,21 @@ input:checked+.slider:before {
     }
 
     .finger {
-        font-weight: 600;
+       
         padding: 2px;
         margin: 10px;
+    }
+    .menu-nav {
+        transition: margin-left 0.3s;
+    }
+    .collapsed {
+        margin-left: -250px; /* Adjust based on sidebar width */
+    }
+    .nav-icon {
+        width: 40px; /* Adjust icon size as needed */
+    }
+    .move-nav {
+        font-size: 24px; /* Adjust title size as needed */
     }
 
 }
