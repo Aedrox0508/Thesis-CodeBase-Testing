@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
     <div class="container-fluid">
         <div class="row flex-nowrap">
             <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 nav-side">
-                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100 menu-nav">
+                <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 min-vh-100 ">
                     <div class="col-12 text-start nav-title">
                         <img src="./assets/img/icon.svg" alt="Icon" class="nav-icon">
                         <h1 class="move-nav">
@@ -230,7 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                         </label>
                                     </div>
                                     <?php
-                                    $ringImageIndex = 17; // Start image index for Thumb gestures at 6
+                                    $ringImageIndex = 13; // Start image index for Thumb gestures at 6
                                     $defaultImageIndex = 14; // Start index for other gestures
                                     foreach ($ring_gestures as $gesture):
                                         $imageIndex = $defaultImageIndex; // Default image index for non-thumb gestures
@@ -276,7 +276,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                     </div>
                                     <?php
                                     // Start image index for Thumb gestures at 6
-                                    $defaultImageIndex = 16; // Start index for other gestures
+                                
+                                    $defaultImageIndex = 15; // Start index for other gestures
                                     foreach ($pinky_gestures as $gesture):
                                         $imageIndex = $defaultImageIndex; // Default image index for non-thumb gestures
 
@@ -298,7 +299,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                                 style="cursor: pointer;"
                                                 data-bs-toggle="modal"
                                                 data-bs-target="#imageModal"
-                                                data-img="<?= './assets/img/' . $imageIndex . '.png' ?>"
+                                                data-img="<?= '/assets/img/' . $imageIndex . '.png' ?>"
                                                 data-id="<?= $gesture['gesture_id'] ?>"
                                                 data-value="<?= htmlspecialchars($gesture['gesture_value']) ?>">
                                             </i>
@@ -323,7 +324,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                                     </div>
                                     <?php
                                     // Start image index for Thumb gestures at 6
-                                    $defaultImageIndex = 17; // Start index for other gestures
+                                    $defaultImageIndex = 16; // Start index for other gestures
                                     foreach ($special_gestures as $gesture):
                                         $imageIndex = $defaultImageIndex; // Default image index for non-thumb gestures
 
@@ -359,9 +360,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save'])) {
                     </div>
                 </div>
             </div>
-                <div class="hamburger" id="hamburger">
-                &#9776; <!-- Hamburger icon -->
-                 </div>
+             
         </div>
 
         <!-- Modal HTML structure -->

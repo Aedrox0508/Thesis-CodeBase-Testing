@@ -19,16 +19,20 @@ body {
     display: grid;
     place-content: center;
     font-family: 'Poppins', sans-serif;
+    margin: 0;
 }
 
 .container{
     position: relative;
+    width: 100%;
     width: 850px;
     height: 500px;
     background-color: #FFF;
     box-shadow: 25px 30px 55px #5557;
     border-radius: 13px;
-    overflow: hidden;    
+    overflow: hidden;  
+    display: flex;
+    flex-direction: column;  
 }
 
 .form-container{
@@ -255,4 +259,63 @@ footer a {
     font-size: 18px;
     font-weight: bold;
     color: #003;
+}
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        box-shadow: none;
+    }
+    form{
+        width: 100%;
+    }
+    .form-container, .overlay-container {
+        width: 100%;
+        padding: 20px;
+        height: auto;
+    }
+
+    .overlay {
+        width: 200%;
+    }
+
+    .overlay-panel {
+        width: 100%;
+        padding: 20px;
+    }
+
+    #overlayBtn {
+        top: 50%;
+    }
+}
+
+@media (max-width: 480px) {
+    form {
+        padding: 0 20px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    input {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    button {
+        padding: 10px 30px;
+        font-size: 12px;
+    }
+
+    p {
+        font-size: 12px;
+        margin: 15px 0;
+    }
+
+    .overlay-panel {
+        padding: 0 20px;
+    }
 }

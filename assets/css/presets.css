@@ -270,7 +270,6 @@ input:checked+.slider:before {
     }
     .nav-side {
         position: absolute;
-        left: -250px; /* Hide sidebar off-screen */
         height: 100%;
         transition: transform 0.3s ease;
     }
@@ -311,9 +310,9 @@ input:checked+.slider:before {
     .menu-nav {
         transition: margin-left 0.3s;
     }
-    .collapsed {
-        margin-left: -250px; /* Adjust based on sidebar width */
-    }
+    /* .collapsed {
+        margin-left: -250px; }
+         */
     .nav-icon {
         width: 40px; /* Adjust icon size as needed */
     }
