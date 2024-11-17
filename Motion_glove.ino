@@ -1,11 +1,18 @@
 #include <WiFi.h>
+#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
-
-const char* ssid = "";  // Replace with your WiFi SSID
-const char* password = "";  // Replace with your WiFi password
+#include <WiFiManager.h> // Include the WiFiManager library
+#include <UniversalTelegramBot.h>
 
 // Server URL
-String serverName = "https://movewave.online/MoveWave_V2/fetch_gesture.php";  // URL for the PHP file
+String serverName = "https://movewave.online/MoveWave_V2/fetch_gesture.php";
+
+// Telegram Bot credentials
+String telegramBotToken = "8127084337:AAH_1xCbf8U3DCUkfP8HBk3wXwgFAabuFw0"; // Replace with your Telegram bot token
+String telegramChatId = "6755870128"; // Replace with your Telegram chat ID
+
+WiFiClientSecure client;
+UniversalTelegramBot bot(telegramBotToken, client);
 
 // Flex sensor pins
 const int flexPinThumb = 36;
@@ -14,36 +21,48 @@ const int flexPinMiddle = 34;
 const int flexPinRing = 33;
 const int flexPinPinky = 32;
 
-void setup() {
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
+// Gesture variables
+String lastGesture = "";
 
-  // Wait until the ESP32 is connected to WiFi
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.println("Connecting to WiFi...");
+// Send gesture data to the server
+void sendToServer(String gesture_name) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    String postData = "gesture_name=" + gesture_name;
+
+    http.begin(serverName);
+    http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+
+    int httpResponseCode = http.POST(postData);
+    if (httpResponseCode > 0) {
+      String response = http.getString();
+      Serial.println("Server response: " + response);
+      bot.sendMessage(telegramChatId, "Server Response: " + response, "");
+    } else {
+      Serial.println("Error sending POST request");
+    }
+    http.end();
+  } else {
+    Serial.println("WiFi not connected");
   }
-  Serial.println("Connected to WiFi");
 }
 
-void loop() {
+// Detect and process gestures
+String detectGesture() {
   int thumb_value = analogRead(flexPinThumb);
   int index_value = analogRead(flexPinIndex);
   int middle_value = analogRead(flexPinMiddle);
   int ring_value = analogRead(flexPinRing);
   int pinky_value = analogRead(flexPinPinky);
 
-  // Display the sensor readings
-
   String gesture_name = "";
 
-  // Determine the gesture name based on which fingers are bent
-  // Thumb connected gestures
   if (thumb_value > 250 && thumb_value < 650) {
-    // Check for the most complex gestures first (e.g., Thumb, Index, Middle, Ring, Pinky)
-    if (thumb_value > 250 && thumb_value < 650 && index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+    if (thumb_value > 250 && thumb_value < 650 && index_value > 250 && index_value < 600 && 
+        middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && 
+        pinky_value > 250 && pinky_value < 600) {
       gesture_name = "Com 20";  // All fingers
-    } else if (thumb_value > 250 && thumb_value < 650 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
+    } else if (middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
       gesture_name = "Com 18";  // Thumb, Middle & Ring
     } else if (index_value > 250 && index_value < 650) {
       gesture_name = "Com 2";  // Thumb & Index
@@ -56,13 +75,11 @@ void loop() {
     } else {
       gesture_name = "Com 1";  // Thumb only
     }
-  }
-
-  // Index connected gestures
-  else if (index_value > 250 && index_value < 600) {
-    if (index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+  } else if (index_value > 250 && index_value < 600) {
+    if (middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && 
+        pinky_value > 250 && pinky_value < 600) {
       gesture_name = "Com 16";  // Index, Middle, Ring & Pinky
-    } else if (index_value > 250 && index_value < 600 && middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
+    } else if (middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600) {
       gesture_name = "Com 17";  // Index, Middle & Ring
     } else if (middle_value > 250 && middle_value < 600) {
       gesture_name = "Com 7";  // Index & Middle
@@ -73,11 +90,8 @@ void loop() {
     } else {
       gesture_name = "Com 6";  // Index only
     }
-  }
-
-  // Middle connected gestures
-  else if (middle_value > 250 && middle_value < 600) {
-    if (middle_value > 250 && middle_value < 600 && ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
+  } else if (middle_value > 250 && middle_value < 600) {
+    if (ring_value > 250 && ring_value < 600 && pinky_value > 250 && pinky_value < 600) {
       gesture_name = "Com 19";  // Middle, Ring & Pinky
     } else if (ring_value > 250 && ring_value < 600) {
       gesture_name = "Com 11";  // Middle & Ring
@@ -86,50 +100,54 @@ void loop() {
     } else {
       gesture_name = "Com 10";  // Middle only
     }
-  }
-
-  // Ring connected gestures
-  else if (ring_value > 250 && ring_value < 600) {
+  } else if (ring_value > 250 && ring_value < 600) {
     if (pinky_value > 250 && pinky_value < 600) {
       gesture_name = "Com 14";  // Ring & Pinky
     } else {
       gesture_name = "Com 13";  // Ring only
     }
-  }
-
-  // Pinky connected gestures
-  else if (pinky_value > 250 && pinky_value < 600) {
+  } else if (pinky_value > 250 && pinky_value < 600) {
     gesture_name = "Com 15";  // Pinky only
   }
 
+  return gesture_name;
+}
 
-  // If a gesture name is determined, send it to the server
-  if (gesture_name != "") {
-    String postData = "gesture_name=" + gesture_name;
-    if (WiFi.status() == WL_CONNECTED) {
-      HTTPClient http;
-      http.begin(serverName);
-      http.addHeader("Content-Type", "application/x-www-form-urlencoded");
+// Setup function
+void setup() {
+  Serial.begin(115200);
 
-      // Send the gesture name to the PHP server
-      int httpResponseCode = http.POST(postData);
+  // Initialize WiFiManager
+  WiFiManager wifiManager;
+  wifiManager.autoConnect("ESP32-Glove"); // AutoConnect with fallback web portal
 
-      // Display HTTP response code for debugging
-      Serial.print("HTTP Response code: ");
-      Serial.println(httpResponseCode);
+  Serial.println("Connected to WiFi!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 
-      if (httpResponseCode > 0) {
-        String response = http.getString();
-        Serial.println("Response from server: " + response);  // Should print the flex_gesture from the database
-      } else {
-        Serial.println("Error on sending POST");
-      }
+  // Initialize Telegram Bot
+  client.setCACert(TELEGRAM_CERTIFICATE_ROOT); // Secure connection for Telegram
+  bot.sendMessage(telegramChatId, "ESP32 Connected", "");
 
-      http.end();  // Free resources
-    } else {
-      Serial.println("WiFi not connected");
-    }
+  // Pin modes
+  pinMode(flexPinThumb, INPUT);
+  pinMode(flexPinIndex, INPUT);
+  pinMode(flexPinMiddle, INPUT);
+  pinMode(flexPinRing, INPUT);
+  pinMode(flexPinPinky, INPUT);
+}
+
+// Loop function
+void loop() {
+  String detectedGesture = detectGesture();
+
+  if (detectedGesture != "" && detectedGesture != lastGesture) {
+    lastGesture = detectedGesture;
+
+    // Notify Telegram and send data to the server
+    bot.sendMessage(telegramChatId, "Gesture Detected: " + detectedGesture, "");
+    sendToServer(detectedGesture);
   }
 
-  delay(3000);  // Wait for 3 seconds before the next reading
+  delay(3500); // Adjust delay as needed
 }
